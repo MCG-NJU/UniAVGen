@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniAVGen - Unified Audio and Video Generation</title>
+    <style>
+        /* Global Resets & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #fcfcfc;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header Styles */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .title {
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+
+        /* Title colors matching LaTeX definitions */
+        .title .myorange { color: #EE8980; } /* Uni, Unified */
+        .title .mypink { color: #FF96C8; }   /* A, Audio */
+        .title .myblue { color: #50B4FF; }   /* V, Video */
+        .title .mygray { color: #c0d6bc; }   /* Gen, Generation */
+        .title .myblack { color: #000000; }
+
+        .authors {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 1rem;
+        }
+
+        .authors span {
+            margin: 0 0.3rem;
+        }
+
+        .affiliations {
+            font-size: 1rem;
+            color: #777;
+            font-style: italic;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        /* Links & Buttons */
+        .links {
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+
+        .link-btn {
+            text-decoration: none;
+            background-color: #d7dee0;
+            color: rgb(0, 0, 0);
+            padding: 0.43rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 350;
+            transition: background-color 0.3s ease;
+        }
+
+        .link-btn:hover {
+            background-color: #a1a1a1;
+        }
+
+        .link-btn.arxiv {
+            background-color: #d7dee0;
+        }
+
+        .link-btn.arxiv:hover {
+            background-color: #a1a1a1;
+        }
+
+        .link-btn.huggingface {
+            background-color: #d7dee0;
+        }
+
+        .link-btn.huggingface:hover {
+            background-color: #a1a1a1;
+        }
+
+        /* Introduction Section */
+        .intro {
+            background-color: #fdfdfd;
+            padding: 2rem;
+            border-radius: 8px;
+            margin-bottom: 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .intro h2 {
+            font-size: 2rem;
+            color: #222;
+            margin-bottom: 1rem;
+        }
+
+        .intro p {
+            font-size: 1.3rem;
+            color: #444;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .intro-img {
+            width: 100%;
+            max-width: 1400px;
+            border-radius: 6px;
+            margin-top: 1rem;
+        }
+
+        /* Tasks Visualization Section */
+        .tasks {
+            margin-bottom: 3rem;
+        }
+
+        .tasks h2 {
+            font-size: 2rem;
+            color: #222;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .task-container {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem; /* Space between tasks */
+        }
+
+        .task-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .task-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-card h3 {
+            font-size: 1.5rem;
+            color: #222;
+            margin-bottom: 1rem;
+        }
+
+        .task-desc {
+            font-size: 1.3rem;
+            color: #555;
+            margin-bottom: 1.2rem;
+        }
+
+        .task-visual {
+            width: 100%;
+            height: 360px;
+            background-color: #f0f0f0;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .task-visual img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .task-visual video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .visual-placeholder {
+            text-align: center;
+            padding: 1rem;
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        /* Joint Audio-Video Generation Grid (2 rows x 3 columns) */
+        .task-card.joint-gen .task-visual-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            height: auto;
+        }
+
+        .task-card.joint-gen .task-visual {
+            height: 200px;
+        }
+
+        /* Other Tasks Grid (1 row x 3 columns) */
+        .task-card.other-task .task-visual-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            height: auto;
+        }
+
+        .task-card.other-task .task-visual {
+            height: 200px;
+        }
+
+        .task-card.other-task .task-audio {
+            height: 100px;
+        }
+
+        /* Citation Section */
+        .citation {
+            background-color: #f8f9fa;
+            padding: 2rem;
+            border-radius: 8px;
+        }
+
+        .citation h2 {
+            font-size: 1.5rem;
+            color: #222;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .bibtex {
+            background-color: #fff;
+            padding: 1.5rem;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #333;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 1.8rem;
+            }
+
+            .links {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .link-btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .intro, .citation {
+                padding: 1.5rem 1rem;
+            }
+
+            .task-card {
+                padding: 1.2rem 1rem;
+            }
+
+            /* Stack grid items on mobile */
+            .task-card.joint-gen .task-visual-grid,
+            .task-card.other-task .task-visual-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .task-card.joint-gen .task-visual,
+            .task-card.other-task .task-visual {
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header: Title, Authors, Affiliations -->
+    <div class="header">
+        <h1 class="title">
+            💫<span class="myorange">Uni</span><span class="mypink">A</span><span class="myblue">V</span><span class="mygray">Gen</span>: 
+            <span class="myorange">Uni</span>fied <span class="mypink">A</span>udio and <span class="myblue">V</span>ideo <span class="mygray">Gen</span>eration with<br>
+            Asymmetric Cross-Modal Interactions
+        </h1>
+        
+        <div class="authors">
+            <span>Guozhen Zhang<sup>1,†</sup></span>,
+            <span>Zixiang Zhou<sup>2,†</sup></span>,
+            <span>Teng Hu<sup>3</sup></span>,
+            <span>Ziqiao Peng<sup>4</sup></span>,
+            <span>Youliang Zhang<sup>5</sup></br>
+            <span>Yi Chen<sup>2</sup></span>,
+            <span>Yuan Zhou<sup>2</sup></span>,
+            <span>Qinglin Lu<sup>2</sup></span>,
+            <span>Limin Wang<sup>1,6,‡</sup></span>
+        </div>
+
+        <div class="affiliations">
+            <sup>1</sup>State Key Laboratory for Novel Software Technology, Nanjing University 
+            <sup>2</sup>Tencent Hunyuan <br>
+            <sup>3</sup>Shanghai Jiao Tong University 
+            <sup>4</sup>Renmin University of China <br>
+            <sup>5</sup>Tsinghua University 
+            <sup>6</sup>Shanghai AI Lab <br>
+            <sup>†</sup>Equal Contribution | <sup>‡</sup>Corresponding Author<br>
+            zgzaacm@gmail.com, lmwang@nju.edu.cn<br>
+        </div>
+
+        <!-- Project Links -->
+        <div class="links">
+            <a href="https://arxiv.org/pdf/2511.03334" class="link-btn arxiv">📎 ArXiv</a>
+            <a href="https://github.com/MCG-NJU/Sora2-mini" class="link-btn github">🚀 Github</a>
+        </div>
+    </div>
+
+    <!-- Introduction Section -->
+    <div class="intro">
+        <h2>📝 Overview</h2>
+        <p>
+            UniAVGen is a unified framework for high-fidelity joint audio-video generation, addressing key limitations of existing methods such as poor lip synchronization, insufficient semantic consistency, and limited task generalization. 
+        </p>
+        <p>
+            At its core, UniAVGen adopts a symmetric dual-branch architecture (parallel Diffusion Transformers for audio and video) and introduces three critical innovations: 
+            (1) <b>Asymmetric Cross-Modal Interaction</b> for bidirectional temporal alignment, 
+            (2) <b>Face-Aware Modulation</b> to prioritize salient facial regions during interaction, 
+            (3) <b>Modality-Aware Classifier-Free Guidance</b> to amplify cross-modal correlations during inference.
+        </p>
+        <img src="method.png" alt="UniAVGen Framework Overview" class="intro-img">
+    </div>
+
+    <!-- Tasks Visualization Section -->
+    <div class="tasks">
+        <h2>🌊 Multi-Task Capabilities</h2>
+        <div class="task-container"> <!-- Single column layout for tasks -->
+            <!-- Task 1: Joint Audio-Video Generation (2 rows x 3 columns) -->
+            <div class="task-card joint-gen">
+                <h3>1. Joint Audio-Video Generation</h3>
+                <div class="task-desc">
+                    <b>Input:</b> Reference image, video caption, speech content.<br><br>
+                    <b>Output:</b> Temporally aligned audio and video.<br><br>
+                    <b>Generated results:</b> <br>
+                </div>
+                <div class="task-visual-grid">
+                    <div class="task-visual"><video src="task1/7.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task1/2.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task1/10.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task1/4.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task1/5.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task1/9.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task1/11.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task1/22.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task1/33.mp4" loop controls muted/></div>
+                </div>
+                <div class="task-desc">
+                    <b>Emotion consistency:</b> <br>
+                </div>
+                <div class="task-visual-grid">
+                    <b>Happy:</b> 
+                    <b>Calm:</b> 
+                    <b>Angry:</b>
+                </div>
+                <div class="task-visual-grid">
+                    <div class="task-visual"><video src="task1/happy.mov" loop controls muted/></div>
+                    <div class="task-visual"><video src="task1/clam.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task1/angry.mp4" loop controls muted/></div>
+                </div>
+            </div>
+
+            <!-- Task 2: Joint Generation with Reference Audio (1 row x 3 columns) -->
+            <div class="task-card other-task">
+                <h3>2. Joint Generation with Reference Audio</h3>
+                <div class="task-desc">
+                    <b>Input:</b> Reference image, video caption, speech content, reference audio for timbre control.<br><br>
+                    <b>Output:</b> Aligned audio-video with timbre matching the reference audio.<br><br>
+                    <b>Reference audio:</b> <br>
+                </div>
+                <!-- <div class="task-visual-grid">
+                    <div class="task-visual"></div><audio src="task2/1.mp4" loop controls /></div>
+                    <div class="task-visual"></div><audio src="task2/2.mp4" loop controls /></div>
+                    <div class="task-visual"></div><audio src="task2/3.mp4" loop controls /></div>
+                </div> -->
+                <div class="task-visual-grid">
+                    <div class="task-audio"><audio src="task2/1.wav" loop controls/></div>
+                    <div class="task-audio"><audio src="task2/2.wav" loop controls/></div>
+                    <div class="task-audio"><audio src="task2/3.wav" loop controls/></div>
+                </div>
+                <div class="task-desc">
+                    <b>Generated results:</b> 
+                </div>
+                <div class="task-visual-grid">
+                    <div class="task-visual"><video src="task2/1.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task2/2.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task2/3.mp4" loop controls muted/></div>
+                </div>
+            </div>
+
+            <!-- Task 3: Joint Audio-Video Continuation (1 row x 3 columns) -->
+            <div class="task-card other-task">
+                <h3>3. Joint Audio-Video Continuation</h3>
+                <div class="task-desc">
+                    <b>Input:</b> Reference image, video caption, speech content, <i>conditional audio/video</i> (in the examples below, the first 2.5s is the condition).<br><br>
+                    <b>Output:</b> Seamless continuation of audio and video, with conditional content preserving temporal consistency via cross-modal interaction.<br>
+                    <br><b>Generated results:</b> <br>
+                </div>
+                <div class="task-visual-grid">
+                    <div class="task-visual"><video src="task3/t3_1.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task3/t3_2.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task3/t3_3.mp4" loop controls muted/></div><br>
+                </div>
+                <div class="task-desc">
+                    <b>Origin Videos:</b> 
+                </div>
+                <div class="task-visual-grid">
+                    <div class="task-visual"><video src="task3/t3_1_.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task3/t3_2_.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task3/t3_3_.mp4" loop controls muted/></div>
+                </div>
+            </div>
+
+            <!-- Task 4: Video-to-Audio Dubbing (1 row x 3 columns) -->
+            <div class="task-card other-task">
+                <h3>4. Video-to-Audio Dubbing</h3>
+                <div class="task-desc">
+                    <b>Input:</b> Conditional silent video, video caption, speech content, <i>optional reference audio</i>.<br><br>
+                    <b>Output:</b> Audio aligned with video emotions/expressions.<br><br>
+                    <b>Generated results:</b> <br>
+                </div>
+                <div class="task-visual-grid">
+                    <div class="task-visual"><video src="task4/t4_1.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task4/t4_2.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task4/t4_3.mp4" loop controls muted/></div><br>
+                </div>
+                <div class="task-desc">
+                    <b>Origin videos:</b> <br>
+                </div>
+                <div class="task-visual-grid">
+                    <div class="task-visual"><video src="task4/t4_1_.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task4/t4_2_.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task4/t4_3_.mp4" loop controls muted/></div>
+                </div>
+            </div>
+
+            <!-- Task 5: Audio-Driven Video Synthesis (1 row x 3 columns) -->
+            <div class="task-card other-task">
+                <h3>5. Audio-Driven Video Synthesis</h3>
+                <div class="task-desc">
+                    <b>Input:</b> Reference image, video caption, conditional audio.<br><br>
+                    <b>Output:</b> Video with expressions/motions aligned to the driving audio.<br><br>
+                    <b>Generated results:</b> <br>
+                </div>
+                <div class="task-visual-grid">
+                    <div class="task-visual"><video src="task5/1.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task5/2.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task5/3.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task5/4.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task5/5.mp4" loop controls muted/></div>
+                    <div class="task-visual"><video src="task5/6.mp4" loop controls muted/></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Citation Section -->
+    <div class="citation">
+        <h2>Cite Our Work</h2>
+        <div class="bibtex">
+
+        </div>
+    </div>
+</body>
+</html>
